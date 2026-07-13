@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { 
   Sparkles, 
@@ -19,7 +19,7 @@ import MuhuratPage from './pages/MuhuratPage';
 import './App.css';
 
 // Layout wrapper to inject active state styles to navigation
-function Navigation() {
+function Navigation({ theme, toggleTheme }) {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -58,15 +58,25 @@ function Navigation() {
             );
           })}
         </div>
-
-        {/* Mobile Toggle Button */}
-        <button 
-          className="mobile-menu-toggle" 
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="Toggle navigation menu"
-        >
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+ 
+        {/* Action Controls (Theme Toggle + Mobile Menu) */}
+        <div className="nav-actions">
+          <button 
+            className="theme-toggle-btn" 
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+ 
+          <button 
+            className="mobile-menu-toggle" 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Drawer Menu */}
@@ -111,10 +121,25 @@ function Footer() {
 }
 
 function App() {
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('theme') || 'dark';
+  });
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+  };
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
   return (
     <Router>
       <div className="app-container">
-        <Navigation />
+        <Navigation theme={theme} toggleTheme={toggleTheme} />
         <main className="main-content-area">
           <Routes>
             <Route path="/" element={<Home />} />
